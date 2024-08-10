@@ -1,0 +1,53 @@
+version: "3.5"
+services:
+  npm:
+    image: jc21/nginx-proxy-manager:latest
+    restart: always
+    ports:
+      - 80:80
+      - 443:443
+      - 81:81
+    environment:
+      - DB_MYSQL_HOST=mariadb
+      - DB_MYSQL_PORT=3306
+      - DB_MYSQL_USER=MYSQL_USER
+      - DB_MYSQL_PASSWORD=DATABASE_PASSWORD
+      - DB_MYSQL_NAME=USER_DB_NAME
+      - DISABLE_IPV6=true
+    volumes:
+      #- ./config.json:/app/config/production.json
+      - ./data:/data
+      - ./letsencrypt:/etc/letsencrypt
+    depends_on:
+      - mariadb
+    logging:
+      options:
+        max-size: 100M
+    networks:
+      docker:
+
+  mariadb:
+    image: linuxserver/mariadb:10.6.13
+    container_name: mariadb
+    restart: always
+    volumes:
+      - ./mariadb:/config
+    ports:
+      - 3306:3306
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Etc/UTC
+      - MYSQL_ROOT_PASSWORD=ROOT_ACCESS_PASSWORD
+      - MYSQL_DATABASE=USER_DB_NAME #optional
+      - MYSQL_USER=MYSQL_USER #optional
+      - MYSQL_PASSWORD=DATABASE_PASSWORD #optional
+      #- REMOTE_SQL=http://URL1/your.sql,https://URL2/your.sql #optional
+    logging:
+      options:
+        max-size: 100M
+    networks:
+      docker:         
+
+networks:
+  docker:
